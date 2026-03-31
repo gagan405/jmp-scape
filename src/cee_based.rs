@@ -3,7 +3,7 @@ use crate::{SigJmpBuf, SigJmpBufFields};
 use libc::{c_int, c_void};
 
 #[link(name = "interop_via_c", kind="static")]
-extern "C" {
+unsafe extern "C" {
     fn call_closure_with_setjmp(closure_env_ptr: *mut c_void, closure_code: extern "C" fn(jbuf: *const JmpBufFields, env_ptr: *mut c_void) -> c_int) -> c_int;
 
     fn call_closure_with_sigsetjmp(savemask: c_int, closure_env_ptr: *mut c_void, closure_code: extern "C" fn(jbuf: *const SigJmpBufFields, env_ptr: *mut c_void) -> c_int) -> c_int;
