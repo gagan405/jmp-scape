@@ -198,7 +198,7 @@ pub type JmpBuf = *const JmpBufFields;
 /// This is the type of the first argument that is fed to siglongjmp.
 pub type SigJmpBuf = *const SigJmpBufFields;
 
-extern "C" {
+unsafe extern "C" {
     /// Given a calling environment `jbuf` (which one can acquire via
     /// `call_with_setjmp`) and a non-zero value `val`, moves the stack and
     /// program counters to match the return position of where `jbuf` was
@@ -347,7 +347,7 @@ mod tests {
     #[cfg(feature = "test_c_integration")]
     #[test]
     fn c_integration() {
-        extern "C" {
+        unsafe extern "C" {
             fn subtract_but_longjmp_if_underflow(env: JmpBuf, a: u32, b: u32) -> u32;
         }
         assert_eq!(
@@ -381,7 +381,7 @@ mod tests {
             sigjb_align: usize,
         }
 
-        extern "C" {
+        unsafe extern "C" {
             fn get_c_jmpbuf_layout() -> LayoutOfJmpBufs;
         }
 
