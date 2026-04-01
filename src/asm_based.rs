@@ -67,11 +67,11 @@ macro_rules! maybesig_setjmp_asm {
             "mov rdi, r12",  // move jbuf_ptr into arg position for sigsetjmp call
             "call {tmp}",    // fills in jbuf; future longjmp calls go here.
             "test eax, eax", // inspect return value of setjmp
-            "jne 1f",        // if non-zero, skip the callback invocation
+            "jne 2f",        // if non-zero, skip the callback invocation
             "mov rdi, r12",  // otherwise, move jbuf ptr into position...
             "mov rsi, r13",  // ... and move callback ptrs into position...
             "call r14"  ,    // ... and invoke the callback
-            "1:",            // at this point, rax carries the return value (from either outcome)
+            "2:",            // at this point, rax carries the return value (from either outcome)
             // we let compiler pick this register since we don't need to preseve
             // it across the first call.
             tmp = in(reg) $setjmp,
@@ -97,12 +97,12 @@ macro_rules! maybesig_setjmp_asm {
             // savemask, if needed, is already in x1
             "mov x0, x21", // move saved jbuf_ptr to sigsetjmp param position. (savemask is already in position)
             "blr {tmp}",   // fills in jbuf; future longjmp calls go here.
-            "cbnz w0, 1f", // if return value non-zero, skip the callback invocation
+            "cbnz w0, 2f", // if return value non-zero, skip the callback invocation
                            // (and if return value non-zero, we cannot assume register state has been restored!)
             "mov x0, x21", // move saved jmp buf into callback's arg position
             "mov x1, x20", // move saved closure env into callback's arg position
             "blr x22",     // invoke the callback
-            "1:",          // at this point, x0 carries the return value (from either outcome)
+            "2:",          // at this point, x0 carries the return value (from either outcome)
             // we let compiler pick this register since we don't need to preseve
             // it across the first call.
             tmp = in(reg) $sigsetjmp,
