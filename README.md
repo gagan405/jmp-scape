@@ -1,12 +1,14 @@
-# cee-scape
+# jmp-scape
 
-The cee-scape crate provides Rust access to `setjmp` and `sigsetjmp`
+The jmp-scape crate provides Rust access to `setjmp` and `sigsetjmp`
 functionality, via an interface that ensures LLVM won't miscompile things.
+
+> **jmp-scape** continues from [cee-scape](https://github.com/pnkfelix/cee-scape), with ongoing maintenance and fixes (for example Linux aarch64 `jmp_buf` layout).
+> Full credit for the original design and implementation belongs to the upstream authors.
 
 ## Example
 
 You might imagine you have some C code that looks like this (vastly over simplified):
-
 ```c
 #include <setjmp.h>
 #include <stdint.h>
@@ -23,9 +25,8 @@ If you want to call out to that C code from Rust, you need to establish a jump
 environment (the `jmp_buf env` parameter); but Rust does not provide `setjmp`.
 
 Here's how you might use this crate to solve your problem:
-
 ```rust
-use cee_scape::call_with_setjmp;
+use jmp_scape::call_with_setjmp;
 
 // This invocation passes parameters that follow normal control flow.
 assert_eq!(call_with_setjmp(|env| {
@@ -71,20 +72,24 @@ specific contexts according to the C standard (again discussed in
 [rust-lang/rfcs Issue 2625]); even just `let x = setjmp(...)` would be undefined
 behavior in Rust.
 
-The methods offered by cee-scape, such as `call_with_setjmp`, side-step the above
-issues by limiting the use of `setjmp` to a specific coding pattern: 
-
+The methods offered by jmp-scape, such as `call_with_setjmp`, side-step the above
+issues by limiting the use of `setjmp` to a specific coding pattern:
 ```rust
 call_with_setjmp(|env| { ... })
 ```
 
 Within the dynamic extent of an invocation to `call_with_setjmp`, one can either
 return normally, or via a `longjmp` to the given jump environment `env` (which
-causes a returns from the `call_with_setjmp` invocation). Either way, the outer
+causes a return from the `call_with_setjmp` invocation). Either way, the outer
 call returns at most once. The given jump environment is only usable within that
 dynamic extent (and Rust's lifetime rules help enforce that constraint).
 
-## Why is it called cee-scape
+## Why is it called jmp-scape?
 
-Its a pun: C's jump environments are also known as "escape continuations". This
-crate enables C escapes.
+It's a pun, carrying forward the spirit of the original `cee-scape` name: C's
+jump environments are also known as "escape continuations". This crate enables
+safe C escape jumps — hence, **jmp-scape**.
+
+## License
+
+Same license as the upstream [cee-scape](https://github.com/pnkfelix/cee-scape) crate.

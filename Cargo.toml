@@ -1,14 +1,15 @@
 [package]
-name = "cee-scape"
-version = "0.2.0"
+name = "jmp-scape"
+version = "0.1.0"
 edition = "2024"
-resolver = "2"
 license = "MIT OR Apache-2.0"
-description = "The cee-scape crate provides Rust access to `setjmp` and `sigsetjmp` functionality"
-homepage = "https://github.com/pnkfelix/cee-scape"
-documentation = "https://docs.rs/cee-scape/"
-repository = "https://github.com/pnkfelix/cee-scape"
+description = "Safe Rust access to setjmp and sigsetjmp, forked from cee-scape."
+homepage = "https://github.com/gagan405/jmp-scape"
+documentation = "https://docs.rs/jmp-scape/"
+repository = "https://github.com/gagan405/jmp-scape"
 readme = "README.md"
+keywords = ["setjmp", "longjmp", "ffi", "c", "signal"]
+categories = ["external-ffi-bindings", "no-std"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -16,10 +17,10 @@ readme = "README.md"
 libc = { version = "0.2", default-features = false }
 
 [dev-dependencies]
-expect-test = "1.4"
+expect-test = "1.5"
 
 [build-dependencies]
-cc = { version = "1.0" }
+cc = { version = "1.2" }
 
 #[profile.release]
 #debug = "full"
