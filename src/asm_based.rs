@@ -56,8 +56,8 @@
 
 use crate::{JmpBuf, JmpBufFields, JmpBufStruct};
 use crate::{SigJmpBuf, SigJmpBufFields, SigJmpBufStruct};
-use libc::c_int;
 use core::mem::MaybeUninit;
+use libc::c_int;
 
 #[cfg(target_arch = "x86_64")]
 macro_rules! maybesig_setjmp_asm {

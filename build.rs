@@ -17,6 +17,5 @@ fn main() {
         cc::Build::new()
             .file("src/interop_via_c.c")
             .compile("interop_via_c");
-    } else {
-    }
+    } 
 }

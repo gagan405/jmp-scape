@@ -193,8 +193,6 @@ use macos_compat as struct_defs;
 pub use crate::struct_defs::{JmpBufFields, JmpBufStruct};
 pub use crate::struct_defs::{SigJmpBufFields, SigJmpBufStruct};
 
-
-
 /// This is the type of the first argument that is fed to longjmp.
 pub type JmpBuf = *const JmpBufFields;
 
@@ -296,7 +294,7 @@ mod tests {
         // compare them in the test output.
         let mut record = String::new();
         let result = call_with_setjmp(|env| {
-            record.push_str("A");
+            record.push('A');
             unsafe {
                 longjmp(env, 4);
             }
@@ -311,7 +309,7 @@ mod tests {
     fn check_control_flow_details_2() {
         let mut record = String::new();
         let result = call_with_setjmp(|_env1| {
-            record.push_str("A");
+            record.push('A');
             let ret = call_with_setjmp(|env2| {
                 record.push_str(" B");
                 unsafe {
@@ -331,7 +329,7 @@ mod tests {
     fn check_control_flow_details_3() {
         let mut record = String::new();
         let result = call_with_setjmp(|env1| {
-            record.push_str("A");
+            record.push('A');
             let ret = call_with_setjmp(|_env2| {
                 record.push_str(" B");
                 unsafe {
@@ -402,8 +400,8 @@ mod tests {
 
 #[cfg(test)]
 mod tests_of_drop_interaction {
-    use std::sync::atomic::{AtomicUsize, Ordering};
     use super::{call_with_setjmp, call_with_sigsetjmp};
+    use std::sync::atomic::{AtomicUsize, Ordering};
     struct IncrementOnDrop(&'static str, &'static AtomicUsize);
     impl IncrementOnDrop {
         fn new(name: &'static str, state: &'static AtomicUsize) -> Self {
@@ -427,7 +425,10 @@ mod tests_of_drop_interaction {
             let _own_it = iod;
             0
         });
-        println!("callback done, drop counter: {}", STATE.load(Ordering::Relaxed));
+        println!(
+            "callback done, drop counter: {}",
+            STATE.load(Ordering::Relaxed)
+        );
         assert_eq!(STATE.load(Ordering::Relaxed), 1);
         let iod = IncrementOnDrop::new("iod", &STATE);
         call_with_setjmp(move |_env| {
@@ -435,7 +436,10 @@ mod tests_of_drop_interaction {
             let _own_it = iod;
             0
         });
-        println!("callback done, drop counter: {}", STATE.load(Ordering::Relaxed));
+        println!(
+            "callback done, drop counter: {}",
+            STATE.load(Ordering::Relaxed)
+        );
         assert_eq!(STATE.load(Ordering::Relaxed), 2);
     }
 
@@ -448,7 +452,10 @@ mod tests_of_drop_interaction {
             let _own_it = iod;
             0
         });
-        println!("callback done, drop counter: {}", STATE.load(Ordering::Relaxed));
+        println!(
+            "callback done, drop counter: {}",
+            STATE.load(Ordering::Relaxed)
+        );
         assert_eq!(STATE.load(Ordering::Relaxed), 1);
         let iod = IncrementOnDrop::new("iod", &STATE);
         call_with_sigsetjmp(true, move |_env| {
@@ -456,7 +463,10 @@ mod tests_of_drop_interaction {
             let _own_it = iod;
             0
         });
-        println!("callback done, drop counter: {}", STATE.load(Ordering::Relaxed));
+        println!(
+            "callback done, drop counter: {}",
+            STATE.load(Ordering::Relaxed)
+        );
         assert_eq!(STATE.load(Ordering::Relaxed), 2);
     }
 
@@ -478,7 +488,10 @@ mod tests_of_drop_interaction {
             let _own_it = iod;
             unsafe { longjmp(env1, 4) }
         });
-        println!("callback done, drop counter: {}", STATE.load(Ordering::Relaxed));
+        println!(
+            "callback done, drop counter: {}",
+            STATE.load(Ordering::Relaxed)
+        );
         assert_eq!(STATE.load(Ordering::Relaxed), 0);
     }
 }
