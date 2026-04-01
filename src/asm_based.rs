@@ -134,7 +134,7 @@ where
         //
         // Note that `closure_env_ptr` is not a raw function pointer, it's a
         // pointer to a FnOnce; the code we call comes from the generic `F`.
-        unsafe { (closure_env_ptr.read())(&*jbuf) }
+        unsafe { closure_env_ptr.read()(&*jbuf) }
     }
     unsafe {
         let mut jbuf = MaybeUninit::<JmpBufStruct>::zeroed().assume_init();

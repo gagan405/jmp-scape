@@ -1,5 +1,8 @@
-//! The cee-scape crate provides access to `setjmp` and `sigsetjmp`
+//! The jmp-scape crate provides access to `setjmp` and `sigsetjmp`
 //! functionality, via an interface that ensures LLVM won't miscompile things.
+//!
+//! Forked from [`cee-scape`](https://github.com/pnkfelix/cee-scape); credit for
+//! the original design and implementation belongs to the upstream authors.
 //!
 //! # Example usage
 //!
@@ -11,7 +14,7 @@
 //!
 //! ```rust
 //! mod pretend_this_comes_from_c {
-//!     use cee_scape::JmpBuf;
+//!     use jmp_scape::JmpBuf;
 //!
 //!     // Returns sum of a and b, but longjmps through `env` if either argument
 //!     // is negative (passing 1) or if the sum overflows (passing 2).
@@ -21,14 +24,14 @@
 //!     }
 //!
 //!     extern "C" fn check_values(env: JmpBuf, a: i32, b: i32) {
-//!         use cee_scape::longjmp;
+//!         use jmp_scape::longjmp;
 //!         if a < 0 || b < 0 { unsafe { longjmp(env, -1); } }
 //!         if (i32::MAX - a) < b { unsafe { longjmp(env, -2); } }
 //!     }
 //! }
 //!
 //! use pretend_this_comes_from_c::careful_sum as sum;
-//! use cee_scape::call_with_setjmp;
+//! use jmp_scape::call_with_setjmp;
 //!
 //! assert_eq!(call_with_setjmp(|env| { sum(env, 10, 20) + 1000 }), 1030);
 //! assert_eq!(call_with_setjmp(|env| { sum(env, -10, 20) + 1000 }), -1);
@@ -80,7 +83,7 @@
 //! pub struct DepthTracker { depth: Cell<usize>, }
 //!
 //! let track = DepthTracker::new();
-//! cee_scape::call_with_setjmp(|env| {
+//! jmp_scape::call_with_setjmp(|env| {
 //!     track.enter(|| {
 //!         // This is what we expect: depth is larger in context of
 //!         // DepthTracker::enter callback
@@ -93,13 +96,13 @@
 //! // Normal case: the tracked depth has returned to zero.
 //! assert_eq!(track.depth(), 0);
 //!
-//! assert_eq!(cee_scape::call_with_setjmp(|env| {
+//! assert_eq!(jmp_scape::call_with_setjmp(|env| {
 //!     track.enter(|| {
 //!         // This is what we expect: depth is larger in context of
 //!         // DepthTracker::enter callback
 //!         assert_eq!(track.depth(), 1);
 //!         // DIFFERENT: Now we bypass the DepthTracker's cleanup code.
-//!         unsafe { cee_scape::longjmp(env, 4) }
+//!         unsafe { jmp_scape::longjmp(env, 4) }
 //!         "abnormal case"
 //!     });
 //!     0
@@ -151,13 +154,13 @@
 //!
 //! ```compile_fail
 //! let mut escaped = None;
-//! cee_scape::call_with_setjmp(|env| {
+//! jmp_scape::call_with_setjmp(|env| {
 //!     // If `env` were allowed to escape...
 //!     escaped = Some(env);
 //!     0
 //! });
 //! // ... it would be bad if we could then do this with it.
-//! unsafe { cee_scape::longjmp(escaped.unwrap(), 1); }
+//! unsafe { jmp_scape::longjmp(escaped.unwrap(), 1); }
 //! ```
 //!
 //! We also cannot share jump environments across threads, because it is
@@ -165,10 +168,10 @@
 //! by a call to `setjmp` in a different thread.
 //!
 //! ```compile_fail
-//! cee_scape::call_with_setjmp(move |env| {
+//! jmp_scape::call_with_setjmp(move |env| {
 //!     std::thread::scope(|s| {
 //!         s.spawn(move || {
-//!             unsafe { cee_scape::longjmp(env, 1); }
+//!             unsafe { jmp_scape::longjmp(env, 1); }
 //!         });
 //!         0
 //!     })

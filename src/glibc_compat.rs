@@ -1,10 +1,21 @@
 use core::marker::PhantomData;
 
+// glibc `__jmp_buf` is architecture-specific (see e.g. sysdeps/*/bits/setjmp.h).
+// Linux aarch64 uses `unsigned long long __jmp_buf[22]`; x86_64 uses `long long[8]`.
+// This module is only used as `struct_defs` on Linux (`lib.rs`); other OSes still
+// compile it with a placeholder length.
+#[cfg(all(target_os = "linux", target_arch = "aarch64"))]
+const JMP_BUF_U64_LEN: usize = 22;
+#[cfg(all(target_os = "linux", not(target_arch = "aarch64")))]
+const JMP_BUF_U64_LEN: usize = 8;
+#[cfg(not(target_os = "linux"))]
+const JMP_BUF_U64_LEN: usize = 8;
+
 /// `JmpBufFields` are the accessible fields when viewed via a JmpBuf pointer.
 /// But also: You shouldn't be poking at these!
 #[repr(C)]
 pub struct JmpBufFields {
-    _buf: [u64; 8],
+    _buf: [u64; JMP_BUF_U64_LEN],
     _neither_send_nor_sync: PhantomData<*const u8>,
 }
 
